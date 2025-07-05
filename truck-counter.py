@@ -30,14 +30,15 @@ while True:
     
     # img_region = cv2.bitwise_and(frame, mask_img)
 
-    results = model(frame, stream = True)
+    results = model(frame, stream = True)   # it is a generator
 
-    for r in results:
+    for r in results:   # if a frame had person and pen then results = [person, boxes]  and runs one time per frame
+        print(f"The results look like this: {r.boxes}")
         class_names  = r.names
         # print(class_names)
-        boxes = r.boxes
+        boxes = r.boxes    # All the objects detected in that frame are here like person, gadi, ghoda... etc etc, 2 person then 2 boxes
 
-        for box in boxes:
+        for box in boxes:   
             x1,y1,x2,y2 = box.xyxy[0]
             x1,y1,x2,y2 = int(x1), int(y1), int(x2), int(y2)
     
@@ -50,11 +51,11 @@ while True:
             if obj_name == "truck" and confidence_score > 0.25:
                 cv2.rectangle(frame, (x1,y1), (x2, y2), (255, 0, 255), 2)
                 cv2.putText(frame, f'{obj_name}', (max(20, x1), max(20, y1)), cv2.FONT_HERSHEY_SIMPLEX, 0.95, (0, 255, 255), 3)  # (max(20, x1), max(20, y1)) now even if the object goes out of the frame, the confidence score will still stays on the frame.
-                # cv2.putText(frame, f'{obj_name}-{math.ceil((confidence_score * 100))/100}', (max(20, x1), max(20, y1)), cv2.FONT_HERSHEY_COMPLEX_SMALL, 0.8, (0, 0, 255), 2)  # (max(20, x1), max(20, y1)) now even if the object goes out of the frame, the confidence score will still stays on the frame.
+                
                 currentArray = np.array([x1, y1, x2, y2, confidence_score])
                 detections = np.vstack((detections, currentArray))
                 
-        results_tracker = tracker.update(detections)
+        results_tracker = tracker.update(detections)  # here 
         
         # THIS LINE IS TO DECIDE THE LINE TO COUNT
         cv2.line(frame, (130, 300), (660, 300), (0,255,0),4)  
@@ -79,7 +80,7 @@ while True:
     cv2.putText(frame, f'COUNTER: {len(total_counts)}', (20, 30), cv2.FONT_HERSHEY_SIMPLEX , 1, (0, 0, 1), 2) 
 
     cv2.imshow("Frames", frame)
-    cv2.waitKey(1)
+    cv2.waitKey(0)
 
 cap.release()
 cv2.destroyAllWindows()
